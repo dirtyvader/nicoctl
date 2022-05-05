@@ -34,9 +34,25 @@ to quickly create a Cobra application.`,
 
 		var query struct {
 			Viewer struct {
-				Login     githubv4.String
-				CreatedAt githubv4.DateTime
-				AvatarUrl githubv4.URI
+				Login        githubv4.String
+				CreatedAt    githubv4.DateTime
+				AvatarUrl    githubv4.URI
+				Repositories struct {
+					Edges []struct {
+						Node struct {
+							Id        githubv4.ID
+							Name      githubv4.String
+							SshUrl    githubv4.String
+							UpdatedAt githubv4.DateTime
+							Languages struct {
+								Nodes []struct {
+									Name  githubv4.String
+									Color githubv4.String
+								}
+							} `graphql:"languages(first: 5)"`
+						}
+					}
+				} `graphql:"repositories(first: 5)"`
 			}
 		}
 
@@ -45,9 +61,26 @@ to quickly create a Cobra application.`,
 			fmt.Printf("Error : %v\n", err)
 		}
 
-		fmt.Println("    Login:", query.Viewer.Login)
-		fmt.Println("CreatedAt:", query.Viewer.CreatedAt)
-		fmt.Println("AvatarUrl:", query.Viewer.AvatarUrl.URL)
+		fmt.Println("       Login:", query.Viewer.Login)
+		fmt.Println("   CreatedAt:", query.Viewer.CreatedAt)
+		fmt.Println("   AvatarUrl:", query.Viewer.AvatarUrl.URL)
+		fmt.Println("Repositories:")
+		for i := 0; i < len(query.Viewer.Repositories.Edges); i++ {
+			currentEdge := query.Viewer.Repositories.Edges[i]
+			fmt.Println("########################################")
+			fmt.Printf("\t-        ID: %s\n", currentEdge.Node.Id)
+			fmt.Printf("\t-      Name: %s\n", currentEdge.Node.Name)
+			fmt.Printf("\t-    SshUrl: %s\n", currentEdge.Node.SshUrl)
+			fmt.Printf("\t- UpdatedAt: %v\n", currentEdge.Node.UpdatedAt)
+			fmt.Printf("\t- Languages:\n")
+			for j := 0; j < len(currentEdge.Node.Languages.Nodes); j++ {
+				currentNode := currentEdge.Node.Languages.Nodes[j]
+				fmt.Printf("\t\t-  Name: %s\n", currentNode.Name)
+				fmt.Printf("\t\t- Color: %s\n\n", currentNode.Color)
+			}
+			fmt.Println("########################################")
+		}
+
 	},
 }
 
